@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.141 0.005 285.823);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.141 0.005 285.823);
+  --muted: oklch(0.965 0.004 286.385);
+  --muted-foreground: oklch(0.551 0.008 286.033);
+  --border: oklch(0.92 0.004 286.32);
+  --ring: oklch(0.871 0.006 286.286);
+}
+
+.dark {
+  --background: oklch(0.141 0.005 285.823);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.21 0.006 285.885);
+  --card-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.21 0.006 285.885);
+  --muted-foreground: oklch(0.71 0.004 286.228);
+  --border: oklch(0.274 0.006 286.033);
+  --ring: oklch(0.274 0.006 286.033);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.bg-card { background: var(--card); color: var(--card-foreground); }
+.bg-muted { background: var(--muted); }
+.text-muted-foreground { color: var(--muted-foreground); }
+.text-card-foreground { color: var(--card-foreground); }
+.border { border-color: var(--border); }
