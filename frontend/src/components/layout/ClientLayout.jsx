@@ -22,8 +22,8 @@ const ClientLayout = () => {
 
   const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: FiGrid },
-    { path: '/dashboard/pos', label: 'POS', icon: FiShoppingCart },
-    { path: '/dashboard/sales', label: 'Sales', icon: FiShoppingBag },
+    { path: '/dashboard/pos', label: 'Sale Invoice', icon: FiShoppingCart },
+    { path: '/dashboard/sales', label: 'Sales Register', icon: FiShoppingBag },
     { path: '/dashboard/purchases', label: 'Purchases', icon: FiTruck },
     { path: '/dashboard/products', label: 'Products', icon: FiPackage },
     { path: '/dashboard/categories', label: 'Categories', icon: FiFolder },
