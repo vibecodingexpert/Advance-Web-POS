@@ -65,7 +65,7 @@ const getSale = async (req, res, next) => {
 const createSale = async (req, res, next) => {
   try {
     const {
-      customerId, items, subtotal, discount, tax, total,
+      customerId, items, subtotal, discount, total,
       paidAmount, paymentType, date, notes
     } = req.body;
 
@@ -84,7 +84,6 @@ const createSale = async (req, res, next) => {
         userId: req.user.id,
         subtotal,
         discount: discount || 0,
-        tax: tax || 0,
         total,
         paidAmount: paidAmount || 0,
         dueAmount,
@@ -247,7 +246,7 @@ const deleteSale = async (req, res, next) => {
 
 const holdInvoice = async (req, res, next) => {
   try {
-    const { customerName, customerPhone, items, subtotal, discount, tax, total, notes } = req.body;
+    const { customerName, customerPhone, items, subtotal, discount, total, notes } = req.body;
 
     const { HeldInvoice } = req.models;
     const invoiceNumber = generateInvoiceNumber('HLD');
@@ -259,7 +258,6 @@ const holdInvoice = async (req, res, next) => {
       items: JSON.stringify(items),
       subtotal,
       discount: discount || 0,
-      tax: tax || 0,
       total,
       notes,
       userId: req.user.id

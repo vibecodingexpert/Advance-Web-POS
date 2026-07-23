@@ -65,7 +65,7 @@ const getPurchase = async (req, res, next) => {
 const createPurchase = async (req, res, next) => {
   try {
     const {
-      vendorId, items, subtotal, discount, tax, total,
+      vendorId, items, subtotal, discount, total,
       paidAmount, paymentType, date, notes
     } = req.body;
 
@@ -84,7 +84,6 @@ const createPurchase = async (req, res, next) => {
         userId: req.user.id,
         subtotal,
         discount: discount || 0,
-        tax: tax || 0,
         total,
         paidAmount: paidAmount || 0,
         dueAmount,

@@ -13,8 +13,6 @@ module.exports = (sequelize, DataTypes) => {
     wholesalePrice: { type: DataTypes.DECIMAL(10, 2) },
     stockQuantity: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0 },
     minimumStock: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0 },
-    taxType: { type: DataTypes.ENUM('none', 'exclusive', 'inclusive'), defaultValue: 'none' },
-    taxAmount: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0 },
     discount: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0 },
     status: { type: DataTypes.ENUM('active', 'inactive'), defaultValue: 'active' }
   }, {

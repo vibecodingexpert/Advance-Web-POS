@@ -7,7 +7,6 @@ module.exports = (sequelize, DataTypes) => {
     items: { type: DataTypes.TEXT },
     subtotal: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
     discount: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0 },
-    tax: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0 },
     total: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
     notes: { type: DataTypes.TEXT },
     userId: { type: DataTypes.INTEGER, allowNull: false }
