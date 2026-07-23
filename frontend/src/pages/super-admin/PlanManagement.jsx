@@ -60,7 +60,7 @@ const PlanManagement = () => {
     setSaving(true);
     try {
       if (editing) {
-        await api.put(`/api/super-admin/plans/${editing._id}`, formData);
+        await api.put(`/api/super-admin/plans/${editing.id}`, formData);
         toast.success('Plan updated successfully');
       } else {
         await api.post('/api/super-admin/plans', formData);
@@ -89,7 +89,7 @@ const PlanManagement = () => {
   const toggleStatus = async (plan) => {
     try {
       const newStatus = plan.status === 'active' ? 'inactive' : 'active';
-      await api.put(`/api/super-admin/plans/${plan._id}`, { status: newStatus });
+      await api.put(`/api/super-admin/plans/${plan.id}`, { status: newStatus });
       toast.success(`Plan ${newStatus === 'active' ? 'activated' : 'deactivated'} successfully`);
       fetchPlans();
     } catch (err) {
@@ -137,7 +137,7 @@ const PlanManagement = () => {
             </thead>
             <tbody>
               {plans.map((plan) => (
-                <tr key={plan._id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                <tr key={plan.id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
                   <td className="py-3 px-4 text-gray-900 dark:text-white font-medium">{plan.name}</td>
                   <td className="py-3 px-4 text-gray-700 dark:text-gray-300">${plan.price}</td>
                   <td className="py-3 px-4 text-gray-500 dark:text-gray-400">{plan.durationDays}</td>
@@ -229,7 +229,7 @@ const PlanManagement = () => {
               <button onClick={() => setDeleteModal(null)} className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
                 Cancel
               </button>
-              <button onClick={() => handleDelete(deleteModal._id)} className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700">
+              <button onClick={() => handleDelete(deleteModal.id)} className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700">
                 Delete
               </button>
             </div>

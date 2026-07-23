@@ -101,13 +101,26 @@ const refreshToken = async (req, res, next) => {
 
 const getDashboard = async (req, res, next) => {
   try {
-    const { Client } = getMasterModels();
+    const { Client, Plan, Subscription } = getMasterModels();
     const totalClients = await Client.count();
     const activeClients = await Client.count({ where: { status: CLIENT_STATUS.ACTIVE } });
     const expiredClients = await Client.count({ where: { status: CLIENT_STATUS.EXPIRED } });
     const suspendedClients = await Client.count({ where: { status: CLIENT_STATUS.SUSPENDED } });
 
-    ApiResponse.success(res, { totalClients, activeClients, expiredClients, suspendedClients });
+    const recentClients = await Client.findAll({ limit: 5, order: [['createdAt', 'DESC']] });
+    const plans = await Plan.findAll();
+    const totalSubscriptions = await Subscription.count();
+
+    const monthlyClients = await Client.count({
+      where: { createdAt: { [Op.gte]: new Date(new Date().setMonth(new Date().getMonth() - 6)) } }
+    });
+
+    ApiResponse.success(res, {
+      stats: { totalClients, activeClients, expiredClients, suspendedClients, totalSubscriptions },
+      recentClients,
+      plans: plans.map(p => ({ name: p.name, count: 0 })),
+      monthlyClients
+    });
   } catch (error) {
     next(error);
   }
