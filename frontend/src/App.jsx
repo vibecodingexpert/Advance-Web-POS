@@ -39,9 +39,9 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/login" />} />
-      <Route path="/login" element={<ClientLogin />} />
-      <Route path="/admin/login" element={<SuperAdminLogin />} />
+      <Route path="/" element={<Navigate to="/portal/login" />} />
+      <Route path="/portal/login" element={<ClientLogin />} />
+      <Route path="/secure/login" element={<SuperAdminLogin />} />
 
       {user?.role === 'super_admin' ? (
         <Route path="/admin" element={<SuperAdminLayout />}>
@@ -69,7 +69,7 @@ function App() {
           <Route path="users" element={<Users />} />
         </Route>
       ) : (
-        <Route path="*" element={<Navigate to="/login" />} />
+        <Route path="*" element={<Navigate to="/portal/login" />} />
       )}
     </Routes>
   );
