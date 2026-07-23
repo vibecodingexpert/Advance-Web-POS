@@ -140,7 +140,7 @@ const POS = () => {
   const handleHoldInvoice = async () => {
     if (cart.length === 0) { toast.warn('Cart is empty'); return; }
     try {
-      await api.post('/api/sales/held', {
+        await api.post('/api/sales/hold', {
         items: JSON.stringify(cart.map(({ id, name, salePrice, quantity, discount }) => ({ productId: id, name, price: salePrice, quantity, discount }))),
         customerName: selectedCustomer?.name || 'Walk-in',
         customerPhone: selectedCustomer?.phone || '',
