@@ -48,10 +48,17 @@ const getVendor = async (req, res, next) => {
   }
 };
 
+const normalizeVendorFields = (data) => {
+  const result = { ...data };
+  if (result.name) { result.vendorName = result.name; delete result.name; }
+  if (result.company) { result.companyName = result.company; delete result.company; }
+  return result;
+};
+
 const createVendor = async (req, res, next) => {
   try {
     const { Vendor } = req.models;
-    const vendor = await Vendor.create(req.body);
+    const vendor = await Vendor.create(normalizeVendorFields(req.body));
     ApiResponse.created(res, vendor, 'Vendor created successfully');
   } catch (error) {
     next(error);
@@ -67,7 +74,7 @@ const updateVendor = async (req, res, next) => {
       return ApiResponse.error(res, 'Vendor not found', 404);
     }
 
-    await vendor.update(req.body);
+    await vendor.update(normalizeVendorFields(req.body));
     ApiResponse.success(res, vendor, 'Vendor updated successfully');
   } catch (error) {
     next(error);

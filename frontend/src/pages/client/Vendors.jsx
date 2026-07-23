@@ -43,8 +43,8 @@ const Vendors = () => {
   const openEditModal = (vendor) => {
     setEditing(vendor);
     setForm({
-      name: vendor.name || '',
-      company: vendor.company || '',
+      name: vendor.vendorName || vendor.name || '',
+      company: vendor.companyName || vendor.company || '',
       phone: vendor.phone || '',
       email: vendor.email || '',
       address: vendor.address || '',
@@ -146,8 +146,8 @@ const Vendors = () => {
               ) : (
                 vendors.map((vendor) => (
                   <tr key={vendor.id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                    <td className="table-cell font-medium">{vendor.name}</td>
-                    <td className="table-cell">{vendor.company || '-'}</td>
+                    <td className="table-cell font-medium">{vendor.vendorName || vendor.name}</td>
+                    <td className="table-cell">{vendor.companyName || vendor.company || '-'}</td>
                     <td className="table-cell">{vendor.phone || '-'}</td>
                     <td className="table-cell">{vendor.email || '-'}</td>
                     <td className="table-cell">{formatCurrency(vendor.totalPurchase || 0)}</td>
@@ -226,7 +226,7 @@ const Vendors = () => {
           <div className="modal-content max-w-3xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-                Ledger - {ledgerVendor.name}
+                Ledger - {ledgerVendor.vendorName || ledgerVendor.name}
               </h3>
               <button onClick={() => setShowLedger(false)} className="text-gray-400 hover:text-gray-600"><FiX size={20} /></button>
             </div>
