@@ -4,6 +4,7 @@ import {
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
+import { formatCurrency } from '../../utils/format';
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -44,7 +45,7 @@ const Products = () => {
         api.get('/api/units'),
       ]);
       setProducts(prodRes.data.data || []);
-      setTotalPages(prodRes.data.totalPages || 1);
+      setTotalPages(prodRes.data.pagination?.totalPages || 1);
       setCategories(catRes.data.data || []);
       setBrands(brandRes.data.data || []);
       setUnits(unitRes.data.data || []);
@@ -75,11 +76,11 @@ const Products = () => {
       category: product.categoryId || product.category || '',
       brand: product.brandId || product.brand || '',
       unit: product.unitId || product.unit || '',
-      salePrice: product.salePrice || '',
-      purchasePrice: product.purchasePrice || '',
-      wholesalePrice: product.wholesalePrice || '',
-      stock: product.stock || '',
-      minStock: product.minStock || '',
+       salePrice: product.salePrice || '',
+        purchasePrice: product.purchasePrice || '',
+        wholesalePrice: product.wholesalePrice || '',
+        stock: product.stockQuantity || product.stock || '',
+        minStock: product.minimumStock || product.minStock || '',
       description: product.description || '',
       status: product.status || 'active',
       images: product.images || []
@@ -234,13 +235,13 @@ const Products = () => {
                       )}
                     </td>
                     <td className="table-cell font-medium">{product.name}</td>
-                    <td className="table-cell">{product.category?.name || '-'}</td>
-                    <td className="table-cell">{product.brand?.name || '-'}</td>
+                    <td className="table-cell">{product.Category?.name || '-'}</td>
+                    <td className="table-cell">{product.Brand?.name || '-'}</td>
                     <td className="table-cell">{product.barcode || '-'}</td>
-                    <td className="table-cell">${(product.salePrice || 0).toFixed(2)}</td>
+                    <td className="table-cell">{formatCurrency(product.salePrice || 0)}</td>
                     <td className="table-cell">
-                      <span className={product.stock <= (product.minStock || 0) ? 'text-red-600 font-medium' : ''}>
-                        {product.stock ?? 0}
+                      <span className={product.stockQuantity <= (product.minimumStock || 0) ? 'text-red-600 font-medium' : ''}>
+                        {product.stockQuantity ?? 0}
                       </span>
                     </td>
                     <td className="table-cell">

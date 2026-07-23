@@ -5,6 +5,7 @@ import {
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
+import { formatCurrency } from '../../utils/format';
 
 const POS = () => {
   const [products, setProducts] = useState([]);
@@ -139,17 +140,15 @@ const POS = () => {
   const handleHoldInvoice = async () => {
     if (cart.length === 0) { toast.warn('Cart is empty'); return; }
     try {
-      await api.post('/api/sales', {
-        items: cart,
-        customer: selectedCustomer?.id || null,
+      await api.post('/api/sales/held', {
+        items: JSON.stringify(cart.map(({ id, name, salePrice, quantity, discount }) => ({ productId: id, name, price: salePrice, quantity, discount }))),
+        customerName: selectedCustomer?.name || 'Walk-in',
+        customerPhone: selectedCustomer?.phone || '',
+        subtotal,
         discount: totalDiscount,
         tax,
-        subtotal,
         total: grandTotal,
-        paid: 0,
-        due: grandTotal,
-        paymentMethod,
-        status: 'held',
+        notes: ''
       });
       toast.success('Invoice held successfully');
       resetCart();
@@ -166,16 +165,14 @@ const POS = () => {
     setProcessing(true);
     try {
       const { data } = await api.post('/api/sales', {
-        items: cart,
-        customer: selectedCustomer?.id || null,
+        items: cart.map(({ id, name, salePrice, quantity, discount }) => ({ productId: id, name, price: salePrice, quantity, discount })),
+        customerId: selectedCustomer?.id || null,
         discount: totalDiscount,
         tax,
         subtotal,
         total: grandTotal,
-        paid: paidAmount || grandTotal,
-        due: paymentMethod === 'credit' ? grandTotal : Math.max(0, grandTotal - paidAmount),
-        paymentMethod,
-        status: 'completed',
+        paidAmount: paidAmount || grandTotal,
+        paymentType: paymentMethod,
       });
       setLastSale(data.data);
       setShowSuccess(true);
@@ -289,7 +286,7 @@ const POS = () => {
               <button
                 key={product.id}
                 onClick={() => addToCart(product)}
-                disabled={product.stock <= 0}
+                disabled={product.stockQuantity <= 0}
                 className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-left hover:shadow-md transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {product.images?.[0] && (
@@ -302,9 +299,9 @@ const POS = () => {
                 <p className="text-sm font-medium text-gray-800 dark:text-white truncate">
                   {product.name}
                 </p>
-                <p className="text-xs text-gray-500">${(product.salePrice || 0).toFixed(2)}</p>
+                <p className="text-xs text-gray-500">{formatCurrency(product.salePrice || 0)}</p>
                 <p className="text-xs text-gray-400">
-                  Stock: {product.stock ?? 0}
+                  Stock: {product.stockQuantity ?? 0}
                   {product.barcode && ` | ${product.barcode}`}
                 </p>
               </button>
@@ -357,13 +354,13 @@ const POS = () => {
                       </button>
                     </div>
                     <span className="text-xs text-gray-500">
-                      ${(item.salePrice || 0).toFixed(2)}
+                      {formatCurrency(item.salePrice || 0)}
                     </span>
                   </div>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-semibold text-gray-800 dark:text-white">
-                    ${((item.salePrice || 0) * item.quantity).toFixed(2)}
+                    {formatCurrency((item.salePrice || 0) * item.quantity)}
                   </p>
                   <input
                     type="number"
@@ -391,7 +388,7 @@ const POS = () => {
           <div className="p-3 border-t border-gray-200 dark:border-gray-700 space-y-2">
             <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
               <span>Subtotal</span>
-              <span>${subtotal.toFixed(2)}</span>
+              <span>{formatCurrency(subtotal)}</span>
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-gray-600 dark:text-gray-400">Discount</span>
@@ -415,7 +412,7 @@ const POS = () => {
             </div>
             <div className="flex justify-between text-lg font-bold text-gray-800 dark:text-white pt-2 border-t border-gray-200 dark:border-gray-700">
               <span>Grand Total</span>
-              <span>${grandTotal.toFixed(2)}</span>
+              <span>{formatCurrency(grandTotal)}</span>
             </div>
 
             <div className="flex gap-2">
@@ -452,7 +449,7 @@ const POS = () => {
               <div className="flex justify-between text-sm">
                 <span className="text-green-600 font-medium">Change</span>
                 <span className="text-green-600 font-medium">
-                  ${Math.max(0, paidAmount - grandTotal).toFixed(2)}
+                  {formatCurrency(Math.max(0, paidAmount - grandTotal))}
                 </span>
               </div>
             )}
@@ -460,7 +457,7 @@ const POS = () => {
             {paymentMethod === 'credit' && (
               <div className="flex justify-between text-sm text-red-600 font-medium">
                 <span>Due</span>
-                <span>${grandTotal.toFixed(2)}</span>
+                <span>{formatCurrency(grandTotal)}</span>
               </div>
             )}
 
@@ -560,10 +557,10 @@ const POS = () => {
                   >
                     <div>
                       <p className="text-sm font-medium text-gray-800 dark:text-white">
-                        #{sale.invoiceNumber || sale.id?.slice(-6)}
+                        #{sale.invoiceNumber || sale.id}
                       </p>
                       <p className="text-xs text-gray-500">
-                        ${sale.total?.toFixed(2)} | {sale.items?.length || 0} items
+                        {formatCurrency(sale.total || 0)} | {sale.items?.length || 0} items
                       </p>
                     </div>
                     <button
@@ -591,9 +588,9 @@ const POS = () => {
             <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">
               Sale Completed!
             </h3>
-            <p className="text-gray-500 mb-2">Invoice #{lastSale.invoiceNumber || lastSale.id?.slice(-6)}</p>
+            <p className="text-gray-500 mb-2">Invoice #{lastSale.invoiceNumber || lastSale.id}</p>
             <p className="text-3xl font-bold text-gray-800 dark:text-white mb-6">
-              ${(lastSale.total || 0).toFixed(2)}
+              {formatCurrency(lastSale.total || 0)}
             </p>
             <div className="flex gap-3 justify-center">
               <button onClick={handlePrint} className="btn-primary flex items-center gap-2">

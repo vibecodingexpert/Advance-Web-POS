@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { FiPlus, FiEdit2, FiTrash2, FiX } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
+import { formatCurrency } from '../../utils/format';
 
 const Expenses = () => {
   const [expenses, setExpenses] = useState([]);
@@ -141,9 +142,9 @@ const Expenses = () => {
                 expenses.map((expense) => (
                   <tr key={expense.id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
                     <td className="table-cell">{new Date(expense.date || expense.createdAt).toLocaleDateString()}</td>
-                    <td className="table-cell">{expense.category?.name || '-'}</td>
+                    <td className="table-cell">{expense.Category?.name || '-'}</td>
                     <td className="table-cell font-medium">{expense.title}</td>
-                    <td className="table-cell text-red-600 font-medium">${(expense.amount || 0).toFixed(2)}</td>
+                    <td className="table-cell text-red-600 font-medium">{formatCurrency(expense.amount || 0)}</td>
                     <td className="table-cell max-w-xs truncate">{expense.description || '-'}</td>
                     <td className="table-cell">{expense.createdBy?.name || '-'}</td>
                     <td className="table-cell">

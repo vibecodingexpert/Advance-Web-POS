@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { FiPlus, FiEdit2, FiTrash2, FiX, FiUpload } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
+import { formatCurrency } from '../../utils/format';
 
 const Assets = () => {
   const [assets, setAssets] = useState([]);
@@ -158,9 +159,9 @@ const Assets = () => {
                       )}
                     </td>
                     <td className="table-cell font-medium">{asset.name}</td>
-                    <td className="table-cell">{asset.category?.name || '-'}</td>
+                    <td className="table-cell">{asset.Category?.name || '-'}</td>
                     <td className="table-cell">{asset.purchaseDate ? new Date(asset.purchaseDate).toLocaleDateString() : '-'}</td>
-                    <td className="table-cell">${(asset.price || 0).toFixed(2)}</td>
+                    <td className="table-cell">{formatCurrency(asset.price || 0)}</td>
                     <td className="table-cell">{asset.quantity || 1}</td>
                     <td className="table-cell">{asset.location || '-'}</td>
                     <td className="table-cell">

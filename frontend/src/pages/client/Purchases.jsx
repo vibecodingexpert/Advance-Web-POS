@@ -4,6 +4,7 @@ import {
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
+import { formatCurrency } from '../../utils/format';
 
 const Purchases = () => {
   const [purchases, setPurchases] = useState([]);
@@ -40,7 +41,7 @@ const Purchases = () => {
       if (filters.vendor) params.vendor = filters.vendor;
       const { data } = await api.get('/api/purchases', { params });
       setPurchases(data.data || []);
-      setTotalPages(data.totalPages || 1);
+      setTotalPages(data.pagination?.totalPages || 1);
     } catch (error) {
       toast.error('Failed to load purchases');
     } finally {
@@ -75,9 +76,9 @@ const Purchases = () => {
   const openEditModal = (purchase) => {
     setEditing(purchase);
     setForm({
-      vendor: purchase.vendor?.id || purchase.vendor || '',
+      vendor: purchase.vendorId || purchase.vendor || '',
       date: purchase.date ? new Date(purchase.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-      items: purchase.items || [],
+      items: (purchase.items || []).map(item => ({ ...item, product: item.productId || item.product || '' })),
       discount: purchase.discount || 0,
       tax: purchase.tax || 0,
       paid: purchase.paid || 0,
@@ -192,12 +193,12 @@ const Purchases = () => {
               ) : (
                 purchases.map((p) => (
                   <tr key={p.id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                    <td className="table-cell font-medium">#{p.purchaseNumber || p.id?.slice(-6)}</td>
+                    <td className="table-cell font-medium">#{p.purchaseNumber || p.id}</td>
                     <td className="table-cell">{new Date(p.date || p.createdAt).toLocaleDateString()}</td>
-                    <td className="table-cell">{p.vendor?.name || '-'}</td>
-                    <td className="table-cell">${(p.total || 0).toFixed(2)}</td>
-                    <td className="table-cell text-green-600">${(p.paid || 0).toFixed(2)}</td>
-                    <td className="table-cell text-red-600">${((p.total || 0) - (p.paid || 0)).toFixed(2)}</td>
+                    <td className="table-cell">{p.Vendor?.name || '-'}</td>
+                    <td className="table-cell">{formatCurrency(p.total || 0)}</td>
+                    <td className="table-cell text-green-600">{formatCurrency(p.paid || 0)}</td>
+                    <td className="table-cell text-red-600">{formatCurrency((p.total || 0) - (p.paid || 0))}</td>
                     <td className="table-cell">
                       <span className={`badge ${p.status === 'received' ? 'badge-success' : p.status === 'pending' ? 'badge-warning' : 'badge-info'}`}>{p.status}</span>
                     </td>
@@ -271,13 +272,13 @@ const Purchases = () => {
                       </thead>
                       <tbody>
                         {form.items.map((item) => {
-                          const prod = products.find((p) => p.id === item.product);
+                          const prod = products.find((p) => p.id === (item.productId || item.product));
                           return (
                             <tr key={item.id} className="border-b border-gray-100 dark:border-gray-700/50">
                               <td className="table-cell">{prod?.name || item.product}</td>
                               <td className="table-cell">{item.quantity}</td>
-                              <td className="table-cell">${(item.price || 0).toFixed(2)}</td>
-                              <td className="table-cell">${((item.price || 0) * (item.quantity || 0)).toFixed(2)}</td>
+                              <td className="table-cell">{formatCurrency(item.price || 0)}</td>
+                              <td className="table-cell">{formatCurrency((item.price || 0) * (item.quantity || 0))}</td>
                               <td className="table-cell">
                                 <button type="button" onClick={() => removeItem(item.id)} className="text-red-600 hover:text-red-800"><FiTrash2 size={14} /></button>
                               </td>
@@ -306,8 +307,8 @@ const Purchases = () => {
               </div>
 
               <div className="text-right">
-                <p className="text-sm text-gray-500">Subtotal: ${purchaseSubtotal.toFixed(2)}</p>
-                <p className="text-lg font-bold text-gray-800 dark:text-white">Total: ${purchaseTotal.toFixed(2)}</p>
+                <p className="text-sm text-gray-500">Subtotal: {formatCurrency(purchaseSubtotal)}</p>
+                <p className="text-lg font-bold text-gray-800 dark:text-white">Total: {formatCurrency(purchaseTotal)}</p>
               </div>
 
               <div>
@@ -338,12 +339,12 @@ const Purchases = () => {
         <div className="modal-overlay" onClick={() => setShowViewModal(false)}>
           <div className="modal-content max-w-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-white">Purchase #{viewingPurchase.purchaseNumber || viewingPurchase.id?.slice(-6)}</h3>
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-white">Purchase #{viewingPurchase.purchaseNumber || viewingPurchase.id}</h3>
               <button onClick={() => setShowViewModal(false)} className="text-gray-400 hover:text-gray-600"><FiX size={20} /></button>
             </div>
             <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
               <div><span className="text-gray-500">Date:</span> <span className="text-gray-800 dark:text-white">{new Date(viewingPurchase.date || viewingPurchase.createdAt).toLocaleDateString()}</span></div>
-              <div><span className="text-gray-500">Vendor:</span> <span className="text-gray-800 dark:text-white">{viewingPurchase.vendor?.name || '-'}</span></div>
+              <div><span className="text-gray-500">Vendor:</span> <span className="text-gray-800 dark:text-white">{viewingPurchase.Vendor?.name || '-'}</span></div>
               <div><span className="text-gray-500">Status:</span> <span className={`badge ${viewingPurchase.status === 'received' ? 'badge-success' : viewingPurchase.status === 'pending' ? 'badge-warning' : 'badge-info'}`}>{viewingPurchase.status}</span></div>
             </div>
             <table className="w-full mb-4">
@@ -358,19 +359,21 @@ const Purchases = () => {
               <tbody>
                 {(viewingPurchase.items || []).map((item, idx) => (
                   <tr key={idx} className="border-b border-gray-100 dark:border-gray-700/50">
-                    <td className="table-cell">{item.product?.name || item.name || '-'}</td>
+                    <td className="table-cell">{item.Product?.name || item.name || '-'}</td>
                     <td className="table-cell">{item.quantity}</td>
-                    <td className="table-cell">${(item.price || 0).toFixed(2)}</td>
-                    <td className="table-cell">${((item.price || 0) * (item.quantity || 0)).toFixed(2)}</td>
+                    <td className="table-cell">{formatCurrency(item.price || 0)}</td>
+                    <td className="table-cell">{formatCurrency((item.price || 0) * (item.quantity || 0))}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
             <div className="text-right space-y-1">
-              <p className="text-sm text-gray-500">Subtotal: ${(viewingPurchase.subtotal || 0).toFixed(2)}</p>
-              <p className="text-sm text-gray-500">Discount: ${(viewingPurchase.discount || 0).toFixed(2)}</p>
-              <p className="text-lg font-bold text-gray-800 dark:text-white">Total: ${(viewingPurchase.total || 0).toFixed(2)}</p>
-              <p className="text-sm text-green-600">Paid: ${(viewingPurchase.paid || 0).toFixed(2)}</p>
+              <p className="text-sm text-gray-500">Subtotal: {formatCurrency(viewingPurchase.subtotal || 0)}</p>
+              <p className="text-sm text-gray-500">Discount: {formatCurrency(viewingPurchase.discount || 0)}</p>
+              <p className="text-lg font-bold text-gray-800 dark:text-white">Total: {formatCurrency(viewingPurchase.total || 0)}</p>
+              <p className="text-sm text-green-600">Paid: {formatCurrency(viewingPurchase.paidAmount || 0)}</p>
+              <p className="text-sm text-red-600">Due: {formatCurrency(viewingPurchase.dueAmount || 0)}</p>
+              <p className="text-sm text-gray-500">Payment: {viewingPurchase.paymentType || '-'}</p>
             </div>
           </div>
         </div>

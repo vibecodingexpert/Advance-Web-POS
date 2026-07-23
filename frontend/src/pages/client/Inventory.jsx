@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { FiSearch, FiPlus, FiX, FiEye } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
+import { formatCurrency } from '../../utils/format';
 
 const Inventory = () => {
   const [products, setProducts] = useState([]);
@@ -105,16 +106,16 @@ const Inventory = () => {
                 </tr>
               ) : (
                 products.map((product) => {
-                  const isLowStock = product.stock <= (product.minStock || 0);
+                  const isLowStock = (product.stockQuantity ?? 0) <= (product.minStock || 0);
                   return (
                     <tr
                       key={product.id}
                       className={`border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30 ${isLowStock ? 'bg-red-50 dark:bg-red-900/20' : ''}`}
                     >
                       <td className="table-cell font-medium">{product.name}</td>
-                      <td className="table-cell">{product.category?.name || '-'}</td>
+                      <td className="table-cell">{product.Category?.name || '-'}</td>
                       <td className={`table-cell font-medium ${isLowStock ? 'text-red-600' : ''}`}>
-                        {product.stock ?? 0}
+                        {product.stockQuantity ?? 0}
                       </td>
                       <td className="table-cell">{product.minStock || 0}</td>
                       <td className="table-cell">
@@ -159,7 +160,7 @@ const Inventory = () => {
               </h3>
               <button onClick={() => setShowAdjustModal(false)} className="text-gray-400 hover:text-gray-600"><FiX size={20} /></button>
             </div>
-            <p className="text-sm text-gray-500 mb-4">Current Stock: <strong>{adjustProduct.stock ?? 0}</strong></p>
+            <p className="text-sm text-gray-500 mb-4">Current Stock: <strong>{adjustProduct.stockQuantity ?? 0}</strong></p>
             <form onSubmit={handleAdjust} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>

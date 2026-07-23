@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiX, FiEye } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
+import { formatCurrency } from '../../utils/format';
 
 const Customers = () => {
   const [customers, setCustomers] = useState([]);
@@ -147,9 +148,9 @@ const Customers = () => {
                     <td className="table-cell font-medium">{customer.name}</td>
                     <td className="table-cell">{customer.phone || '-'}</td>
                     <td className="table-cell">{customer.email || '-'}</td>
-                    <td className="table-cell">${(customer.totalSale || 0).toFixed(2)}</td>
-                    <td className="table-cell text-green-600">${(customer.totalPaid || 0).toFixed(2)}</td>
-                    <td className="table-cell text-red-600">${(customer.totalDue || 0).toFixed(2)}</td>
+                    <td className="table-cell">{formatCurrency(customer.totalSale || 0)}</td>
+                    <td className="table-cell text-green-600">{formatCurrency(customer.totalPaid || 0)}</td>
+                    <td className="table-cell text-red-600">{formatCurrency(customer.totalDue || 0)}</td>
                     <td className="table-cell">
                       <span className={`badge ${customer.status === 'active' ? 'badge-success' : 'badge-danger'}`}>{customer.status}</span>
                     </td>
@@ -244,9 +245,9 @@ const Customers = () => {
                       <tr key={idx} className="border-b border-gray-100 dark:border-gray-700/50">
                         <td className="table-cell">{new Date(entry.date || entry.createdAt).toLocaleDateString()}</td>
                         <td className="table-cell">{entry.description || entry.note || '-'}</td>
-                        <td className="table-cell text-red-600">{entry.debit ? `$${entry.debit.toFixed(2)}` : '-'}</td>
-                        <td className="table-cell text-green-600">{entry.credit ? `$${entry.credit.toFixed(2)}` : '-'}</td>
-                        <td className="table-cell font-medium">${(entry.balance || 0).toFixed(2)}</td>
+                        <td className="table-cell text-red-600">{entry.debit ? formatCurrency(entry.debit) : '-'}</td>
+                        <td className="table-cell text-green-600">{entry.credit ? formatCurrency(entry.credit) : '-'}</td>
+                        <td className="table-cell font-medium">{formatCurrency(entry.balance || 0)}</td>
                       </tr>
                     ))
                   ) : (

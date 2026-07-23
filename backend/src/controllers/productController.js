@@ -1,12 +1,25 @@
 const { Op } = require('sequelize');
 const ApiResponse = require('../utils/response');
 
+const normalizeProductFields = (data) => {
+  const result = { ...data };
+  if (result.category || result.category === 0) { result.categoryId = parseInt(result.category) || null; delete result.category; }
+  if (result.brand || result.brand === 0) { result.brandId = parseInt(result.brand) || null; delete result.brand; }
+  if (result.unit || result.unit === 0) { result.unitId = parseInt(result.unit) || null; delete result.unit; }
+  if (result.stock || result.stock === 0 || result.stock === '0') { result.stockQuantity = parseFloat(result.stock) || 0; delete result.stock; }
+  if (result.minStock || result.minStock === 0 || result.minStock === '0') { result.minimumStock = parseFloat(result.minStock) || 0; delete result.minStock; }
+  return result;
+};
+
 const getProducts = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
-    const { categoryId, brandId, status } = req.query;
+    let { categoryId, category, brandId, brand, status } = req.query;
+
+    if (!categoryId && category) categoryId = category;
+    if (!brandId && brand) brandId = brand;
 
     const where = {};
     if (categoryId) where.categoryId = categoryId;
@@ -59,10 +72,10 @@ const createProduct = async (req, res, next) => {
     const { Product } = req.models;
     const image = req.file ? req.file.path : null;
 
-    const productData = {
+    const productData = normalizeProductFields({
       ...req.body,
       image
-    };
+    });
 
     const product = await Product.create(productData);
     ApiResponse.created(res, product, 'Product created successfully');
@@ -81,7 +94,7 @@ const updateProduct = async (req, res, next) => {
     }
 
     const image = req.file ? req.file.path : undefined;
-    const updateData = { ...req.body };
+    const updateData = normalizeProductFields({ ...req.body });
     if (image) updateData.image = image;
 
     await product.update(updateData);

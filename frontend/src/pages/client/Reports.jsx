@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { FiDownload, FiSearch } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
+import { formatCurrency } from '../../utils/format';
 
 const TABS = ['Sales Report', 'Purchases', 'Profit/Loss', 'Stock', 'Day Book', 'Cash Book'];
 
@@ -90,20 +91,20 @@ const Reports = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="card text-center">
             <p className="text-sm text-gray-500 dark:text-gray-400">Total Sales</p>
-            <p className="text-2xl font-bold text-green-600">${(summary.totalSales || 0).toFixed(2)}</p>
+            <p className="text-2xl font-bold text-green-600">{formatCurrency(summary.totalSales || 0)}</p>
           </div>
           <div className="card text-center">
             <p className="text-sm text-gray-500 dark:text-gray-400">Total Purchases</p>
-            <p className="text-2xl font-bold text-red-600">${(summary.totalPurchases || 0).toFixed(2)}</p>
+            <p className="text-2xl font-bold text-red-600">{formatCurrency(summary.totalPurchases || 0)}</p>
           </div>
           <div className="card text-center">
             <p className="text-sm text-gray-500 dark:text-gray-400">Total Expenses</p>
-            <p className="text-2xl font-bold text-orange-600">${(summary.totalExpenses || 0).toFixed(2)}</p>
+            <p className="text-2xl font-bold text-orange-600">{formatCurrency(summary.totalExpenses || 0)}</p>
           </div>
           <div className="card text-center">
             <p className="text-sm text-gray-500 dark:text-gray-400">Profit / Loss</p>
             <p className={`text-2xl font-bold ${profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {profit >= 0 ? '+' : ''}${profit.toFixed(2)}
+              {profit >= 0 ? '+' : ''}{formatCurrency(Math.abs(profit))}
             </p>
           </div>
         </div>
@@ -130,11 +131,11 @@ const Reports = () => {
               ) : (
                 data.map((item, idx) => (
                   <tr key={idx} className="border-b border-gray-100 dark:border-gray-700/50">
-                    <td className="table-cell">{item.name || item.product?.name || '-'}</td>
-                    <td className="table-cell">{item.category?.name || '-'}</td>
+                    <td className="table-cell">{item.name || item.Product?.name || '-'}</td>
+                    <td className="table-cell">{item.Category?.name || '-'}</td>
                     <td className={`table-cell ${item.stock <= (item.minStock || 0) ? 'text-red-600 font-medium' : ''}`}>{item.stock ?? 0}</td>
                     <td className="table-cell">{item.minStock || 0}</td>
-                    <td className="table-cell">${(item.salePrice || 0).toFixed(2)}</td>
+                    <td className="table-cell">{formatCurrency(item.salePrice || 0)}</td>
                     <td className="table-cell">
                       <span className={`badge ${(item.stock ?? 0) > (item.minStock || 0) ? 'badge-success' : 'badge-danger'}`}>
                         {(item.stock ?? 0) > (item.minStock || 0) ? 'In Stock' : 'Low Stock'}
@@ -175,7 +176,7 @@ const Reports = () => {
                     .map(([key, val], i) => (
                       <td key={i} className="table-cell">
                         {key.toLowerCase().includes('amount') || key.toLowerCase().includes('total') || key.toLowerCase().includes('price')
-                          ? typeof val === 'number' ? `$${val.toFixed(2)}` : val
+                          ? typeof val === 'number' ? formatCurrency(val) : val
                           : key.toLowerCase().includes('date') || key.toLowerCase().includes('createdat')
                           ? val ? new Date(val).toLocaleDateString() : '-'
                           : typeof val === 'object' && val !== null
@@ -240,17 +241,17 @@ const Reports = () => {
           <div className="flex gap-4 pt-4 border-t border-gray-200 dark:border-gray-700 mt-4">
             <p className="text-sm text-gray-500">
               Total: <span className="font-bold text-gray-800 dark:text-white">
-                ${data.reduce((sum, row) => sum + (row.total || 0), 0).toFixed(2)}
+                {formatCurrency(data.reduce((sum, row) => sum + (row.total || 0), 0))}
               </span>
             </p>
             <p className="text-sm text-gray-500">
               Paid: <span className="font-bold text-green-600">
-                ${data.reduce((sum, row) => sum + (row.paid || 0), 0).toFixed(2)}
+                {formatCurrency(data.reduce((sum, row) => sum + (row.paid || 0), 0))}
               </span>
             </p>
             <p className="text-sm text-gray-500">
               Due: <span className="font-bold text-red-600">
-                ${data.reduce((sum, row) => sum + (row.due || 0), 0).toFixed(2)}
+                {formatCurrency(data.reduce((sum, row) => sum + (row.due || 0), 0))}
               </span>
             </p>
           </div>
