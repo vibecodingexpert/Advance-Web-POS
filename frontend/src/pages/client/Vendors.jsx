@@ -57,7 +57,7 @@ const Vendors = () => {
     e.preventDefault();
     try {
       if (editing) {
-        await api.put(`/api/vendors/${editing._id}`, form);
+        await api.put(`/api/vendors/${editing.id}`, form);
         toast.success('Vendor updated');
       } else {
         await api.post('/api/vendors', form);
@@ -84,7 +84,7 @@ const Vendors = () => {
   const viewLedger = async (vendor) => {
     setLedgerVendor(vendor);
     try {
-      const { data } = await api.get(`/api/vendors/${vendor._id}/ledger`);
+      const { data } = await api.get(`/api/vendors/${vendor.id}/ledger`);
       setLedgerData(data.data || []);
     } catch (error) {
       toast.error('Failed to load ledger');
@@ -144,7 +144,7 @@ const Vendors = () => {
                 </tr>
               ) : (
                 vendors.map((vendor) => (
-                  <tr key={vendor._id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                  <tr key={vendor.id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
                     <td className="table-cell font-medium">{vendor.name}</td>
                     <td className="table-cell">{vendor.company || '-'}</td>
                     <td className="table-cell">{vendor.phone || '-'}</td>
@@ -161,7 +161,7 @@ const Vendors = () => {
                           <FiEye size={16} />
                         </button>
                         <button onClick={() => openEditModal(vendor)} className="text-blue-600 hover:text-blue-800"><FiEdit2 size={16} /></button>
-                        <button onClick={() => handleDelete(vendor._id)} className="text-red-600 hover:text-red-800"><FiTrash2 size={16} /></button>
+                        <button onClick={() => handleDelete(vendor.id)} className="text-red-600 hover:text-red-800"><FiTrash2 size={16} /></button>
                       </div>
                     </td>
                   </tr>

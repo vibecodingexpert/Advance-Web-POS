@@ -55,7 +55,7 @@ const Assets = () => {
     setEditing(asset);
     setForm({
       name: asset.name || '',
-      category: asset.category?._id || asset.category || '',
+      category: asset.categoryId || asset.category || '',
       purchaseDate: asset.purchaseDate ? new Date(asset.purchaseDate).toISOString().split('T')[0] : '',
       price: asset.price || '',
       quantity: asset.quantity || 1,
@@ -87,7 +87,7 @@ const Assets = () => {
       const config = { headers: { 'Content-Type': 'multipart/form-data' } };
 
       if (editing) {
-        await api.put(`/api/assets/${editing._id}`, formData, config);
+        await api.put(`/api/assets/${editing.id}`, formData, config);
         toast.success('Asset updated');
       } else {
         await api.post('/api/assets', formData, config);
@@ -149,7 +149,7 @@ const Assets = () => {
                 </tr>
               ) : (
                 assets.map((asset) => (
-                  <tr key={asset._id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                  <tr key={asset.id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
                     <td className="table-cell">
                       {asset.image ? (
                         <img src={asset.image} alt={asset.name} className="w-10 h-10 object-cover rounded" />
@@ -169,7 +169,7 @@ const Assets = () => {
                     <td className="table-cell">
                       <div className="flex gap-2">
                         <button onClick={() => openEditModal(asset)} className="text-blue-600 hover:text-blue-800"><FiEdit2 size={16} /></button>
-                        <button onClick={() => handleDelete(asset._id)} className="text-red-600 hover:text-red-800"><FiTrash2 size={16} /></button>
+                        <button onClick={() => handleDelete(asset.id)} className="text-red-600 hover:text-red-800"><FiTrash2 size={16} /></button>
                       </div>
                     </td>
                   </tr>
@@ -196,7 +196,7 @@ const Assets = () => {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
                 <select className="input-field" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
                   <option value="">Select</option>
-                  {categories.map((cat) => (<option key={cat._id} value={cat._id}>{cat.name}</option>))}
+                  {categories.map((cat) => (<option key={cat.id} value={cat.id}>{cat.name}</option>))}
                 </select>
               </div>
               <div>

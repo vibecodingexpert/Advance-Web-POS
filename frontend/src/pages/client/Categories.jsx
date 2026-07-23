@@ -43,7 +43,7 @@ const Categories = () => {
     e.preventDefault();
     try {
       if (editing) {
-        await api.put(`/api/categories/${editing._id}`, form);
+        await api.put(`/api/categories/${editing.id}`, form);
         toast.success('Category updated');
       } else {
         await api.post('/api/categories', form);
@@ -100,7 +100,7 @@ const Categories = () => {
                 </tr>
               ) : (
                 categories.map((cat) => (
-                  <tr key={cat._id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                  <tr key={cat.id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
                     <td className="table-cell font-medium">{cat.name}</td>
                     <td className="table-cell">{cat.description || '-'}</td>
                     <td className="table-cell">
@@ -109,7 +109,7 @@ const Categories = () => {
                     <td className="table-cell">
                       <div className="flex gap-2">
                         <button onClick={() => openEditModal(cat)} className="text-blue-600 hover:text-blue-800"><FiEdit2 size={16} /></button>
-                        <button onClick={() => handleDelete(cat._id)} className="text-red-600 hover:text-red-800"><FiTrash2 size={16} /></button>
+                        <button onClick={() => handleDelete(cat.id)} className="text-red-600 hover:text-red-800"><FiTrash2 size={16} /></button>
                       </div>
                     </td>
                   </tr>

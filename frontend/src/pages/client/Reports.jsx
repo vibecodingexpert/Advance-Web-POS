@@ -179,7 +179,7 @@ const Reports = () => {
                           : key.toLowerCase().includes('date') || key.toLowerCase().includes('createdat')
                           ? val ? new Date(val).toLocaleDateString() : '-'
                           : typeof val === 'object' && val !== null
-                          ? val.name || val._id || JSON.stringify(val)
+                          ? val.name || val.id || JSON.stringify(val)
                           : String(val ?? '-')}
                       </td>
                     ))}

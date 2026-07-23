@@ -54,7 +54,7 @@ const Expenses = () => {
     setEditing(expense);
     setForm({
       date: expense.date ? new Date(expense.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-      category: expense.category?._id || expense.category || '',
+      category: expense.categoryId || expense.category || '',
       title: expense.title || '',
       amount: expense.amount || '',
       description: expense.description || '',
@@ -66,7 +66,7 @@ const Expenses = () => {
     e.preventDefault();
     try {
       if (editing) {
-        await api.put(`/api/expenses/${editing._id}`, form);
+        await api.put(`/api/expenses/${editing.id}`, form);
         toast.success('Expense updated');
       } else {
         await api.post('/api/expenses', form);
@@ -108,7 +108,7 @@ const Expenses = () => {
           >
             <option value="">All Categories</option>
             {categories.map((cat) => (
-              <option key={cat._id} value={cat._id}>{cat.name}</option>
+              <option key={cat.id} value={cat.id}>{cat.name}</option>
             ))}
           </select>
         </div>
@@ -139,7 +139,7 @@ const Expenses = () => {
                 </tr>
               ) : (
                 expenses.map((expense) => (
-                  <tr key={expense._id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                  <tr key={expense.id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
                     <td className="table-cell">{new Date(expense.date || expense.createdAt).toLocaleDateString()}</td>
                     <td className="table-cell">{expense.category?.name || '-'}</td>
                     <td className="table-cell font-medium">{expense.title}</td>
@@ -149,7 +149,7 @@ const Expenses = () => {
                     <td className="table-cell">
                       <div className="flex gap-2">
                         <button onClick={() => openEditModal(expense)} className="text-blue-600 hover:text-blue-800"><FiEdit2 size={16} /></button>
-                        <button onClick={() => handleDelete(expense._id)} className="text-red-600 hover:text-red-800"><FiTrash2 size={16} /></button>
+                        <button onClick={() => handleDelete(expense.id)} className="text-red-600 hover:text-red-800"><FiTrash2 size={16} /></button>
                       </div>
                     </td>
                   </tr>
@@ -178,7 +178,7 @@ const Expenses = () => {
                   <select required className="input-field" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
                     <option value="">Select</option>
                     {categories.map((cat) => (
-                      <option key={cat._id} value={cat._id}>{cat.name}</option>
+                      <option key={cat.id} value={cat.id}>{cat.name}</option>
                     ))}
                   </select>
                 </div>

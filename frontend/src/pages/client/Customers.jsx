@@ -57,7 +57,7 @@ const Customers = () => {
     e.preventDefault();
     try {
       if (editing) {
-        await api.put(`/api/customers/${editing._id}`, form);
+        await api.put(`/api/customers/${editing.id}`, form);
         toast.success('Customer updated');
       } else {
         await api.post('/api/customers', form);
@@ -84,7 +84,7 @@ const Customers = () => {
   const viewLedger = async (customer) => {
     setLedgerCustomer(customer);
     try {
-      const { data } = await api.get(`/api/customers/${customer._id}/ledger`);
+      const { data } = await api.get(`/api/customers/${customer.id}/ledger`);
       setLedgerData(data.data || []);
     } catch (error) {
       toast.error('Failed to load ledger');
@@ -143,7 +143,7 @@ const Customers = () => {
                 </tr>
               ) : (
                 customers.map((customer) => (
-                  <tr key={customer._id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                  <tr key={customer.id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
                     <td className="table-cell font-medium">{customer.name}</td>
                     <td className="table-cell">{customer.phone || '-'}</td>
                     <td className="table-cell">{customer.email || '-'}</td>
@@ -159,7 +159,7 @@ const Customers = () => {
                           <FiEye size={16} />
                         </button>
                         <button onClick={() => openEditModal(customer)} className="text-blue-600 hover:text-blue-800"><FiEdit2 size={16} /></button>
-                        <button onClick={() => handleDelete(customer._id)} className="text-red-600 hover:text-red-800"><FiTrash2 size={16} /></button>
+                        <button onClick={() => handleDelete(customer.id)} className="text-red-600 hover:text-red-800"><FiTrash2 size={16} /></button>
                       </div>
                     </td>
                   </tr>

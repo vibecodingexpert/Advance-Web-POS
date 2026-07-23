@@ -53,7 +53,7 @@ const Users = () => {
       email: user.email || '',
       phone: user.phone || '',
       password: '',
-      role: user.role?._id || user.role || '',
+      role: user.roleId || user.role || '',
       status: user.status || 'active',
     });
     setShowModal(true);
@@ -65,7 +65,7 @@ const Users = () => {
       const payload = { ...form };
       if (editing && !payload.password) delete payload.password;
       if (editing) {
-        await api.put(`/api/users/${editing._id}`, payload);
+        await api.put(`/api/users/${editing.id}`, payload);
         toast.success('User updated');
       } else {
         await api.post('/api/users', payload);
@@ -92,7 +92,7 @@ const Users = () => {
   const viewPermissions = async (user) => {
     setPermissionUser(user);
     try {
-      const { data } = await api.get(`/api/users/${user._id}/permissions`);
+      const { data } = await api.get(`/api/users/${user.id}/permissions`);
       setPermissions(data.data || []);
       setShowPermissionModal(true);
     } catch (error) {
@@ -137,7 +137,7 @@ const Users = () => {
                 </tr>
               ) : (
                 users.map((user) => (
-                  <tr key={user._id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                  <tr key={user.id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
                     <td className="table-cell font-medium">{user.name}</td>
                     <td className="table-cell">{user.email}</td>
                     <td className="table-cell">{user.phone || '-'}</td>
@@ -156,7 +156,7 @@ const Users = () => {
                           <FiShield size={16} />
                         </button>
                         <button onClick={() => openEditModal(user)} className="text-blue-600 hover:text-blue-800"><FiEdit2 size={16} /></button>
-                        <button onClick={() => handleDelete(user._id)} className="text-red-600 hover:text-red-800"><FiTrash2 size={16} /></button>
+                        <button onClick={() => handleDelete(user.id)} className="text-red-600 hover:text-red-800"><FiTrash2 size={16} /></button>
                       </div>
                     </td>
                   </tr>
@@ -203,7 +203,7 @@ const Users = () => {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Role *</label>
                 <select required className="input-field" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
                   <option value="">Select Role</option>
-                  {roles.map((r) => (<option key={r._id} value={r._id}>{r.name}</option>))}
+                  {roles.map((r) => (<option key={r.id} value={r.id}>{r.name}</option>))}
                   <option value="admin">Admin</option>
                   <option value="staff">Staff</option>
                 </select>

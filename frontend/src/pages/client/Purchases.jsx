@@ -75,7 +75,7 @@ const Purchases = () => {
   const openEditModal = (purchase) => {
     setEditing(purchase);
     setForm({
-      vendor: purchase.vendor?._id || purchase.vendor || '',
+      vendor: purchase.vendor?.id || purchase.vendor || '',
       date: purchase.date ? new Date(purchase.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
       items: purchase.items || [],
       discount: purchase.discount || 0,
@@ -91,13 +91,13 @@ const Purchases = () => {
     if (!newItem.product) return toast.warn('Select a product');
     setForm((prev) => ({
       ...prev,
-      items: [...prev.items, { ...newItem, _id: Date.now() }],
+      items: [...prev.items, { ...newItem, id: Date.now() }],
     }));
     setNewItem({ product: '', quantity: 1, price: 0 });
   };
 
   const removeItem = (id) => {
-    setForm((prev) => ({ ...prev, items: prev.items.filter((item) => item._id !== id) }));
+    setForm((prev) => ({ ...prev, items: prev.items.filter((item) => item.id !== id) }));
   };
 
   const purchaseSubtotal = form.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -113,7 +113,7 @@ const Purchases = () => {
         total: purchaseTotal,
       };
       if (editing) {
-        await api.put(`/api/purchases/${editing._id}`, payload);
+        await api.put(`/api/purchases/${editing.id}`, payload);
         toast.success('Purchase updated');
       } else {
         await api.post('/api/purchases', payload);
@@ -139,7 +139,7 @@ const Purchases = () => {
 
   const viewPurchase = async (purchase) => {
     try {
-      const { data } = await api.get(`/api/purchases/${purchase._id}`);
+      const { data } = await api.get(`/api/purchases/${purchase.id}`);
       setViewingPurchase(data.data);
       setShowViewModal(true);
     } catch (error) {
@@ -166,7 +166,7 @@ const Purchases = () => {
           <input type="date" className="input-field w-full sm:w-40" value={filters.to} onChange={(e) => setFilters({ ...filters, to: e.target.value })} />
           <select className="input-field w-full sm:w-44" value={filters.vendor} onChange={(e) => setFilters({ ...filters, vendor: e.target.value })}>
             <option value="">All Vendors</option>
-            {vendors.map((v) => (<option key={v._id} value={v._id}>{v.name}</option>))}
+            {vendors.map((v) => (<option key={v.id} value={v.id}>{v.name}</option>))}
           </select>
         </div>
 
@@ -191,8 +191,8 @@ const Purchases = () => {
                 <tr><td colSpan="8" className="text-center py-8 text-gray-400">No purchases found</td></tr>
               ) : (
                 purchases.map((p) => (
-                  <tr key={p._id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                    <td className="table-cell font-medium">#{p.purchaseNo || p._id?.slice(-6)}</td>
+                  <tr key={p.id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                    <td className="table-cell font-medium">#{p.purchaseNumber || p.id?.slice(-6)}</td>
                     <td className="table-cell">{new Date(p.date || p.createdAt).toLocaleDateString()}</td>
                     <td className="table-cell">{p.vendor?.name || '-'}</td>
                     <td className="table-cell">${(p.total || 0).toFixed(2)}</td>
@@ -205,7 +205,7 @@ const Purchases = () => {
                       <div className="flex gap-2">
                         <button onClick={() => viewPurchase(p)} className="text-blue-600 hover:text-blue-800"><FiEdit2 size={16} /></button>
                         <button onClick={() => openEditModal(p)} className="text-purple-600 hover:text-purple-800"><FiEdit2 size={16} /></button>
-                        <button onClick={() => handleDelete(p._id)} className="text-red-600 hover:text-red-800"><FiTrash2 size={16} /></button>
+                        <button onClick={() => handleDelete(p.id)} className="text-red-600 hover:text-red-800"><FiTrash2 size={16} /></button>
                       </div>
                     </td>
                   </tr>
@@ -237,7 +237,7 @@ const Purchases = () => {
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Vendor *</label>
                   <select required className="input-field" value={form.vendor} onChange={(e) => setForm({ ...form, vendor: e.target.value })}>
                     <option value="">Select Vendor</option>
-                    {vendors.map((v) => (<option key={v._id} value={v._id}>{v.name}</option>))}
+                    {vendors.map((v) => (<option key={v.id} value={v.id}>{v.name}</option>))}
                   </select>
                 </div>
                 <div>
@@ -251,7 +251,7 @@ const Purchases = () => {
                 <div className="flex gap-2 mb-2">
                   <select className="input-field flex-1" value={newItem.product} onChange={(e) => setNewItem({ ...newItem, product: e.target.value })}>
                     <option value="">Select Product</option>
-                    {products.map((p) => (<option key={p._id} value={p._id}>{p.name}</option>))}
+                    {products.map((p) => (<option key={p.id} value={p.id}>{p.name}</option>))}
                   </select>
                   <input type="number" placeholder="Qty" className="input-field w-20" value={newItem.quantity} onChange={(e) => setNewItem({ ...newItem, quantity: parseInt(e.target.value) || 1 })} />
                   <input type="number" placeholder="Price" className="input-field w-28" value={newItem.price} onChange={(e) => setNewItem({ ...newItem, price: parseFloat(e.target.value) || 0 })} />
@@ -271,15 +271,15 @@ const Purchases = () => {
                       </thead>
                       <tbody>
                         {form.items.map((item) => {
-                          const prod = products.find((p) => p._id === item.product);
+                          const prod = products.find((p) => p.id === item.product);
                           return (
-                            <tr key={item._id} className="border-b border-gray-100 dark:border-gray-700/50">
+                            <tr key={item.id} className="border-b border-gray-100 dark:border-gray-700/50">
                               <td className="table-cell">{prod?.name || item.product}</td>
                               <td className="table-cell">{item.quantity}</td>
                               <td className="table-cell">${(item.price || 0).toFixed(2)}</td>
                               <td className="table-cell">${((item.price || 0) * (item.quantity || 0)).toFixed(2)}</td>
                               <td className="table-cell">
-                                <button type="button" onClick={() => removeItem(item._id)} className="text-red-600 hover:text-red-800"><FiTrash2 size={14} /></button>
+                                <button type="button" onClick={() => removeItem(item.id)} className="text-red-600 hover:text-red-800"><FiTrash2 size={14} /></button>
                               </td>
                             </tr>
                           );
@@ -338,7 +338,7 @@ const Purchases = () => {
         <div className="modal-overlay" onClick={() => setShowViewModal(false)}>
           <div className="modal-content max-w-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-white">Purchase #{viewingPurchase.purchaseNo || viewingPurchase._id?.slice(-6)}</h3>
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-white">Purchase #{viewingPurchase.purchaseNumber || viewingPurchase.id?.slice(-6)}</h3>
               <button onClick={() => setShowViewModal(false)} className="text-gray-400 hover:text-gray-600"><FiX size={20} /></button>
             </div>
             <div className="grid grid-cols-2 gap-4 mb-4 text-sm">

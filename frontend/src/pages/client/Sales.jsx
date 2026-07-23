@@ -51,7 +51,7 @@ const Sales = () => {
 
   const viewSale = async (sale) => {
     try {
-      const { data } = await api.get(`/api/sales/${sale._id}`);
+      const { data } = await api.get(`/api/sales/${sale.id}`);
       setViewingSale(data.data);
       setShowViewModal(true);
     } catch (error) {
@@ -61,7 +61,7 @@ const Sales = () => {
 
   const handlePrint = async (sale) => {
     try {
-      const { data } = await api.get(`/api/sales/${sale._id}/print`, { responseType: 'blob' });
+      const { data } = await api.get(`/api/sales/${sale.id}/print`, { responseType: 'blob' });
       const url = window.URL.createObjectURL(new Blob([data]));
       window.open(url, '_blank');
     } catch (error) {
@@ -72,7 +72,7 @@ const Sales = () => {
   const handleReturn = async (sale) => {
     if (!window.confirm('Process return for this sale?')) return;
     try {
-      await api.post(`/api/sales/${sale._id}/return`);
+      await api.post(`/api/sales/${sale.id}/return`);
       toast.success('Return processed');
       fetchSales();
     } catch (error) {
@@ -117,7 +117,7 @@ const Sales = () => {
           >
             <option value="">All Customers</option>
             {customers.map((c) => (
-              <option key={c._id} value={c._id}>{c.name}</option>
+              <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
           <select
@@ -160,8 +160,8 @@ const Sales = () => {
                 </tr>
               ) : (
                 sales.map((sale) => (
-                  <tr key={sale._id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                    <td className="table-cell font-medium">#{sale.invoiceNo || sale._id?.slice(-6)}</td>
+                  <tr key={sale.id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                    <td className="table-cell font-medium">#{sale.invoiceNumber || sale.id?.slice(-6)}</td>
                     <td className="table-cell">{new Date(sale.createdAt).toLocaleDateString()}</td>
                     <td className="table-cell">{sale.customer?.name || 'Walk-in'}</td>
                     <td className="table-cell">${(sale.total || 0).toFixed(2)}</td>
@@ -201,7 +201,7 @@ const Sales = () => {
           <div className="modal-content max-w-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-                Sale #{viewingSale.invoiceNo || viewingSale._id?.slice(-6)}
+                Sale #{viewingSale.invoiceNumber || viewingSale.id?.slice(-6)}
               </h3>
               <button onClick={() => setShowViewModal(false)} className="text-gray-400 hover:text-gray-600"><FiX size={20} /></button>
             </div>

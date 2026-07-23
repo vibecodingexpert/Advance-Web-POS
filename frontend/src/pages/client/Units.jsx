@@ -43,7 +43,7 @@ const Units = () => {
     e.preventDefault();
     try {
       if (editing) {
-        await api.put(`/api/units/${editing._id}`, form);
+        await api.put(`/api/units/${editing.id}`, form);
         toast.success('Unit updated');
       } else {
         await api.post('/api/units', form);
@@ -100,7 +100,7 @@ const Units = () => {
                 </tr>
               ) : (
                 units.map((unit) => (
-                  <tr key={unit._id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                  <tr key={unit.id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
                     <td className="table-cell font-medium">{unit.name}</td>
                     <td className="table-cell">{unit.shortName || '-'}</td>
                     <td className="table-cell">
@@ -109,7 +109,7 @@ const Units = () => {
                     <td className="table-cell">
                       <div className="flex gap-2">
                         <button onClick={() => openEditModal(unit)} className="text-blue-600 hover:text-blue-800"><FiEdit2 size={16} /></button>
-                        <button onClick={() => handleDelete(unit._id)} className="text-red-600 hover:text-red-800"><FiTrash2 size={16} /></button>
+                        <button onClick={() => handleDelete(unit.id)} className="text-red-600 hover:text-red-800"><FiTrash2 size={16} /></button>
                       </div>
                     </td>
                   </tr>

@@ -39,7 +39,7 @@ const Inventory = () => {
   const handleAdjust = async (e) => {
     e.preventDefault();
     try {
-      await api.post(`/api/products/${adjustProduct._id}/adjust-stock`, adjustForm);
+      await api.post(`/api/products/${adjustProduct.id}/adjust-stock`, adjustForm);
       toast.success('Stock adjusted successfully');
       setShowAdjustModal(false);
       fetchProducts();
@@ -51,7 +51,7 @@ const Inventory = () => {
   const viewHistory = async (product) => {
     setHistoryProduct(product);
     try {
-      const { data } = await api.get(`/api/products/${product._id}/stock-history`);
+      const { data } = await api.get(`/api/products/${product.id}/stock-history`);
       setHistoryData(data.data || []);
       setShowHistoryModal(true);
     } catch (error) {
@@ -108,7 +108,7 @@ const Inventory = () => {
                   const isLowStock = product.stock <= (product.minStock || 0);
                   return (
                     <tr
-                      key={product._id}
+                      key={product.id}
                       className={`border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30 ${isLowStock ? 'bg-red-50 dark:bg-red-900/20' : ''}`}
                     >
                       <td className="table-cell font-medium">{product.name}</td>

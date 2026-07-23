@@ -65,7 +65,7 @@ const Brands = () => {
       const config = { headers: { 'Content-Type': 'multipart/form-data' } };
 
       if (editing) {
-        await api.put(`/api/brands/${editing._id}`, formData, config);
+        await api.put(`/api/brands/${editing.id}`, formData, config);
         toast.success('Brand updated');
       } else {
         await api.post('/api/brands', formData, config);
@@ -123,7 +123,7 @@ const Brands = () => {
                 </tr>
               ) : (
                 brands.map((brand) => (
-                  <tr key={brand._id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                  <tr key={brand.id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
                     <td className="table-cell">
                       {brand.image ? (
                         <img src={brand.image} alt={brand.name} className="w-10 h-10 object-cover rounded" />
@@ -139,7 +139,7 @@ const Brands = () => {
                     <td className="table-cell">
                       <div className="flex gap-2">
                         <button onClick={() => openEditModal(brand)} className="text-blue-600 hover:text-blue-800"><FiEdit2 size={16} /></button>
-                        <button onClick={() => handleDelete(brand._id)} className="text-red-600 hover:text-red-800"><FiTrash2 size={16} /></button>
+                        <button onClick={() => handleDelete(brand.id)} className="text-red-600 hover:text-red-800"><FiTrash2 size={16} /></button>
                       </div>
                     </td>
                   </tr>

@@ -72,9 +72,9 @@ const Products = () => {
     setForm({
       name: product.name || '',
       barcode: product.barcode || '',
-      category: product.category?._id || product.category || '',
-      brand: product.brand?._id || product.brand || '',
-      unit: product.unit?._id || product.unit || '',
+      category: product.categoryId || product.category || '',
+      brand: product.brandId || product.brand || '',
+      unit: product.unitId || product.unit || '',
       salePrice: product.salePrice || '',
       purchasePrice: product.purchasePrice || '',
       wholesalePrice: product.wholesalePrice || '',
@@ -110,7 +110,7 @@ const Products = () => {
       const config = { headers: { 'Content-Type': 'multipart/form-data' } };
 
       if (editing) {
-        await api.put(`/api/products/${editing._id}`, formData, config);
+        await api.put(`/api/products/${editing.id}`, formData, config);
         toast.success('Product updated successfully');
       } else {
         await api.post('/api/products', formData, config);
@@ -183,7 +183,7 @@ const Products = () => {
           >
             <option value="">All Categories</option>
             {categories.map((cat) => (
-              <option key={cat._id} value={cat._id}>{cat.name}</option>
+              <option key={cat.id} value={cat.id}>{cat.name}</option>
             ))}
           </select>
           <select
@@ -225,7 +225,7 @@ const Products = () => {
                 </tr>
               ) : (
                 products.map((product) => (
-                  <tr key={product._id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                  <tr key={product.id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
                     <td className="table-cell">
                       {product.images?.[0] ? (
                         <img src={product.images[0]} alt={product.name} className="w-10 h-10 object-cover rounded" />
@@ -253,7 +253,7 @@ const Products = () => {
                         <button onClick={() => openEditModal(product)} className="text-blue-600 hover:text-blue-800">
                           <FiEdit2 size={16} />
                         </button>
-                        <button onClick={() => handleDelete(product._id)} className="text-red-600 hover:text-red-800">
+                        <button onClick={() => handleDelete(product.id)} className="text-red-600 hover:text-red-800">
                           <FiTrash2 size={16} />
                         </button>
                       </div>
@@ -326,7 +326,7 @@ const Products = () => {
                 >
                   <option value="">Select</option>
                   {categories.map((cat) => (
-                    <option key={cat._id} value={cat._id}>{cat.name}</option>
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
                   ))}
                 </select>
               </div>
@@ -339,7 +339,7 @@ const Products = () => {
                 >
                   <option value="">Select</option>
                   {brands.map((brand) => (
-                    <option key={brand._id} value={brand._id}>{brand.name}</option>
+                    <option key={brand.id} value={brand.id}>{brand.name}</option>
                   ))}
                 </select>
               </div>
@@ -352,7 +352,7 @@ const Products = () => {
                 >
                   <option value="">Select</option>
                   {units.map((unit) => (
-                    <option key={unit._id} value={unit._id}>{unit.name}</option>
+                    <option key={unit.id} value={unit.id}>{unit.name}</option>
                   ))}
                 </select>
               </div>

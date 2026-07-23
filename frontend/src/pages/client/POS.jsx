@@ -78,16 +78,16 @@ const POS = () => {
       !searchTerm ||
       p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       p.barcode?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || p.category?._id === selectedCategory || p.category === selectedCategory;
+    const matchesCategory = selectedCategory === 'all' || p.categoryId === selectedCategory || p.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
   const addToCart = (product) => {
     setCart((prev) => {
-      const existing = prev.find((item) => item._id === product._id);
+      const existing = prev.find((item) => item.id === product.id);
       if (existing) {
         return prev.map((item) =>
-          item._id === product._id
+          item.id === product.id
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
@@ -95,7 +95,7 @@ const POS = () => {
       return [
         ...prev,
         {
-          _id: product._id,
+          id: product.id,
           name: product.name,
           barcode: product.barcode,
           salePrice: product.salePrice || 0,
@@ -109,13 +109,13 @@ const POS = () => {
   const updateCartItem = (id, field, value) => {
     setCart((prev) =>
       prev.map((item) =>
-        item._id === id ? { ...item, [field]: value } : item
+        item.id === id ? { ...item, [field]: value } : item
       )
     );
   };
 
   const removeFromCart = (id) => {
-    setCart((prev) => prev.filter((item) => item._id !== id));
+    setCart((prev) => prev.filter((item) => item.id !== id));
   };
 
   const subtotal = cart.reduce((sum, item) => sum + item.salePrice * item.quantity, 0);
@@ -141,7 +141,7 @@ const POS = () => {
     try {
       await api.post('/api/sales', {
         items: cart,
-        customer: selectedCustomer?._id || null,
+        customer: selectedCustomer?.id || null,
         discount: totalDiscount,
         tax,
         subtotal,
@@ -167,7 +167,7 @@ const POS = () => {
     try {
       const { data } = await api.post('/api/sales', {
         items: cart,
-        customer: selectedCustomer?._id || null,
+        customer: selectedCustomer?.id || null,
         discount: totalDiscount,
         tax,
         subtotal,
@@ -271,10 +271,10 @@ const POS = () => {
             </button>
             {categories.map((cat) => (
               <button
-                key={cat._id}
-                onClick={() => setSelectedCategory(cat._id)}
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id)}
                 className={`px-3 py-1.5 rounded-lg text-sm whitespace-nowrap ${
-                  selectedCategory === cat._id
+                  selectedCategory === cat.id
                     ? 'bg-primary-600 text-white'
                     : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
                 }`}
@@ -287,7 +287,7 @@ const POS = () => {
           <div className="flex-1 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 content-start">
             {filteredProducts.map((product) => (
               <button
-                key={product._id}
+                key={product.id}
                 onClick={() => addToCart(product)}
                 disabled={product.stock <= 0}
                 className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-left hover:shadow-md transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
@@ -324,7 +324,7 @@ const POS = () => {
           <div className="flex-1 overflow-y-auto p-3 space-y-2">
             {cart.map((item) => (
               <div
-                key={item._id}
+                key={item.id}
                 className="flex items-center gap-2 bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg"
               >
                 <div className="flex-1 min-w-0">
@@ -335,7 +335,7 @@ const POS = () => {
                     <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded">
                       <button
                         onClick={() =>
-                          updateCartItem(item._id, 'quantity', Math.max(1, item.quantity - 1))
+                          updateCartItem(item.id, 'quantity', Math.max(1, item.quantity - 1))
                         }
                         className="px-1.5 py-0.5 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600"
                       >
@@ -345,12 +345,12 @@ const POS = () => {
                         type="number"
                         value={item.quantity}
                         onChange={(e) =>
-                          updateCartItem(item._id, 'quantity', Math.max(1, parseInt(e.target.value) || 1))
+                          updateCartItem(item.id, 'quantity', Math.max(1, parseInt(e.target.value) || 1))
                         }
                         className="w-10 text-center text-xs bg-transparent border-x border-gray-300 dark:border-gray-600 py-0.5 outline-none text-gray-800 dark:text-white"
                       />
                       <button
-                        onClick={() => updateCartItem(item._id, 'quantity', item.quantity + 1)}
+                        onClick={() => updateCartItem(item.id, 'quantity', item.quantity + 1)}
                         className="px-1.5 py-0.5 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600"
                       >
                         <FiPlus size={12} />
@@ -370,13 +370,13 @@ const POS = () => {
                     placeholder="Disc"
                     value={item.discount || ''}
                     onChange={(e) =>
-                      updateCartItem(item._id, 'discount', parseFloat(e.target.value) || 0)
+                      updateCartItem(item.id, 'discount', parseFloat(e.target.value) || 0)
                     }
                     className="w-16 text-xs bg-transparent border border-gray-300 dark:border-gray-600 rounded px-1 py-0.5 text-gray-600 dark:text-gray-400 mt-1"
                   />
                 </div>
                 <button
-                  onClick={() => removeFromCart(item._id)}
+                  onClick={() => removeFromCart(item.id)}
                   className="text-red-500 hover:text-red-700 p-1"
                 >
                   <FiTrash2 size={14} />
@@ -523,13 +523,13 @@ const POS = () => {
                 )
                 .map((customer) => (
                   <button
-                    key={customer._id}
+                    key={customer.id}
                     onClick={() => {
                       setSelectedCustomer(customer);
                       setShowCustomerModal(false);
                     }}
                     className={`w-full text-left p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                      selectedCustomer?._id === customer._id
+                      selectedCustomer?.id === customer.id
                         ? 'bg-primary-50 dark:bg-primary-900/30'
                         : ''
                     }`}
@@ -555,12 +555,12 @@ const POS = () => {
               <div className="space-y-2">
                 {heldInvoices.map((sale) => (
                   <div
-                    key={sale._id}
+                    key={sale.id}
                     className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
                   >
                     <div>
                       <p className="text-sm font-medium text-gray-800 dark:text-white">
-                        #{sale.invoiceNo || sale._id?.slice(-6)}
+                        #{sale.invoiceNumber || sale.id?.slice(-6)}
                       </p>
                       <p className="text-xs text-gray-500">
                         ${sale.total?.toFixed(2)} | {sale.items?.length || 0} items
@@ -591,7 +591,7 @@ const POS = () => {
             <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">
               Sale Completed!
             </h3>
-            <p className="text-gray-500 mb-2">Invoice #{lastSale.invoiceNo || lastSale._id?.slice(-6)}</p>
+            <p className="text-gray-500 mb-2">Invoice #{lastSale.invoiceNumber || lastSale.id?.slice(-6)}</p>
             <p className="text-3xl font-bold text-gray-800 dark:text-white mb-6">
               ${(lastSale.total || 0).toFixed(2)}
             </p>
