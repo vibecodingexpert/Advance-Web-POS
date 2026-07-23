@@ -1,23 +1,19 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { Op, DataTypes } = require('sequelize');
+const { Op } = require('sequelize');
 const ApiResponse = require('../utils/response');
-const { masterDb } = require('../config/database');
+const { masterDb, getClientDb } = require('../config/database');
 const { sanitizeDbName } = require('../utils/helpers');
 const { ROLES, CLIENT_STATUS } = require('../utils/constants');
-const SuperAdmin = require('../models/master/SuperAdmin')(masterDb, DataTypes);
-const Client = require('../models/master/Client')(masterDb, DataTypes);
-const Plan = require('../models/master/Plan')(masterDb, DataTypes);
-const Subscription = require('../models/master/Subscription')(masterDb, DataTypes);
-const ActivityLog = require('../models/master/ActivityLog')(masterDb, DataTypes);
+const { getMasterModels } = require('../models/master');
 const { setupNewClient, dropClientDatabase } = require('../services/databaseService');
 const { createDefaultRoles } = require('../services/seedService');
-const { getClientDb } = require('../config/database');
 const { initClientModels } = require('../models/client');
 
 const superAdminLogin = async (req, res, next) => {
   try {
     const { email, password } = req.body;
+    const { SuperAdmin } = getMasterModels();
 
     const admin = await SuperAdmin.findOne({ where: { email } });
     if (!admin) {
@@ -67,20 +63,16 @@ const superAdminLogin = async (req, res, next) => {
 const refreshToken = async (req, res, next) => {
   try {
     const { refreshToken: token } = req.body;
-
     if (!token) {
       return ApiResponse.error(res, 'Refresh token is required', 400);
     }
 
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET
-    );
-
+    const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET);
     if (decoded.type !== 'refresh') {
       return ApiResponse.error(res, 'Invalid refresh token', 401);
     }
 
+    const { SuperAdmin } = getMasterModels();
     const admin = await SuperAdmin.findByPk(decoded.id);
     if (!admin || admin.status !== 'active') {
       return ApiResponse.error(res, 'Admin not found or inactive', 401);
@@ -109,17 +101,13 @@ const refreshToken = async (req, res, next) => {
 
 const getDashboard = async (req, res, next) => {
   try {
+    const { Client } = getMasterModels();
     const totalClients = await Client.count();
     const activeClients = await Client.count({ where: { status: CLIENT_STATUS.ACTIVE } });
     const expiredClients = await Client.count({ where: { status: CLIENT_STATUS.EXPIRED } });
     const suspendedClients = await Client.count({ where: { status: CLIENT_STATUS.SUSPENDED } });
 
-    ApiResponse.success(res, {
-      totalClients,
-      activeClients,
-      expiredClients,
-      suspendedClients
-    });
+    ApiResponse.success(res, { totalClients, activeClients, expiredClients, suspendedClients });
   } catch (error) {
     next(error);
   }
@@ -127,6 +115,7 @@ const getDashboard = async (req, res, next) => {
 
 const getClients = async (req, res, next) => {
   try {
+    const { Client } = getMasterModels();
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
@@ -142,13 +131,7 @@ const getClients = async (req, res, next) => {
       ];
     }
 
-    const { count, rows } = await Client.findAndCountAll({
-      where,
-      limit,
-      offset,
-      order: [['createdAt', 'DESC']]
-    });
-
+    const { count, rows } = await Client.findAndCountAll({ where, limit, offset, order: [['createdAt', 'DESC']] });
     ApiResponse.paginated(res, rows, count, page, limit);
   } catch (error) {
     next(error);
@@ -157,10 +140,9 @@ const getClients = async (req, res, next) => {
 
 const getClient = async (req, res, next) => {
   try {
+    const { Client } = getMasterModels();
     const client = await Client.findByPk(req.params.id);
-    if (!client) {
-      return ApiResponse.error(res, 'Client not found', 404);
-    }
+    if (!client) return ApiResponse.error(res, 'Client not found', 404);
     ApiResponse.success(res, client);
   } catch (error) {
     next(error);
@@ -169,28 +151,16 @@ const getClient = async (req, res, next) => {
 
 const createClient = async (req, res, next) => {
   try {
-    const { businessName, ownerName, email, phone, address, city, country, password } = req.body;
+    const { businessName, ownerName, email, phone, address, city, country, password = 'password123' } = req.body;
     const logo = req.file ? req.file.path : null;
+    const { Client } = getMasterModels();
 
     const existing = await Client.findOne({ where: { email } });
-    if (existing) {
-      return ApiResponse.error(res, 'Client with this email already exists', 409);
-    }
+    if (existing) return ApiResponse.error(res, 'Client with this email already exists', 409);
 
     const databaseName = sanitizeDbName(businessName);
 
-    const client = await Client.create({
-      businessName,
-      ownerName,
-      email,
-      phone,
-      address,
-      city,
-      country,
-      logo,
-      databaseName
-    });
-
+    const client = await Client.create({ businessName, ownerName, email, phone, address, city, country, logo, databaseName });
     await setupNewClient(databaseName);
 
     const sequelize = getClientDb(databaseName);
@@ -200,13 +170,7 @@ const createClient = async (req, res, next) => {
     const hashedPassword = await bcrypt.hash(password, 12);
 
     const adminRole = await models.Role.findOne({ where: { slug: ROLES.ADMIN } });
-    await models.User.create({
-      name: ownerName,
-      email,
-      password: hashedPassword,
-      phone,
-      roleId: adminRole ? adminRole.id : null
-    });
+    await models.User.create({ name: ownerName, email, password: hashedPassword, phone, roleId: adminRole ? adminRole.id : null });
 
     ApiResponse.created(res, client, 'Client created successfully');
   } catch (error) {
@@ -216,10 +180,9 @@ const createClient = async (req, res, next) => {
 
 const updateClient = async (req, res, next) => {
   try {
+    const { Client } = getMasterModels();
     const client = await Client.findByPk(req.params.id);
-    if (!client) {
-      return ApiResponse.error(res, 'Client not found', 404);
-    }
+    if (!client) return ApiResponse.error(res, 'Client not found', 404);
 
     const { businessName, ownerName, email, phone, address, city, country } = req.body;
     const logo = req.file ? req.file.path : undefined;
@@ -243,15 +206,12 @@ const updateClient = async (req, res, next) => {
 
 const deleteClient = async (req, res, next) => {
   try {
+    const { Client } = getMasterModels();
     const client = await Client.findByPk(req.params.id);
-    if (!client) {
-      return ApiResponse.error(res, 'Client not found', 404);
-    }
+    if (!client) return ApiResponse.error(res, 'Client not found', 404);
 
-    const dbName = client.databaseName;
-    await dropClientDatabase(dbName);
+    await dropClientDatabase(client.databaseName);
     await client.destroy();
-
     ApiResponse.success(res, null, 'Client deleted successfully');
   } catch (error) {
     next(error);
@@ -260,10 +220,9 @@ const deleteClient = async (req, res, next) => {
 
 const suspendClient = async (req, res, next) => {
   try {
+    const { Client } = getMasterModels();
     const client = await Client.findByPk(req.params.id);
-    if (!client) {
-      return ApiResponse.error(res, 'Client not found', 404);
-    }
+    if (!client) return ApiResponse.error(res, 'Client not found', 404);
 
     await client.update({ status: CLIENT_STATUS.SUSPENDED });
     ApiResponse.success(res, client, 'Client suspended successfully');
@@ -274,10 +233,9 @@ const suspendClient = async (req, res, next) => {
 
 const activateClient = async (req, res, next) => {
   try {
+    const { Client } = getMasterModels();
     const client = await Client.findByPk(req.params.id);
-    if (!client) {
-      return ApiResponse.error(res, 'Client not found', 404);
-    }
+    if (!client) return ApiResponse.error(res, 'Client not found', 404);
 
     await client.update({ status: CLIENT_STATUS.ACTIVE });
     ApiResponse.success(res, client, 'Client activated successfully');
@@ -288,16 +246,12 @@ const activateClient = async (req, res, next) => {
 
 const getPlans = async (req, res, next) => {
   try {
+    const { Plan } = getMasterModels();
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
 
-    const { count, rows } = await Plan.findAndCountAll({
-      limit,
-      offset,
-      order: [['createdAt', 'DESC']]
-    });
-
+    const { count, rows } = await Plan.findAndCountAll({ limit, offset, order: [['createdAt', 'DESC']] });
     ApiResponse.paginated(res, rows, count, page, limit);
   } catch (error) {
     next(error);
@@ -307,17 +261,9 @@ const getPlans = async (req, res, next) => {
 const createPlan = async (req, res, next) => {
   try {
     const { name, price, duration, maxUsers, maxProducts, features, status } = req.body;
+    const { Plan } = getMasterModels();
 
-    const plan = await Plan.create({
-      name,
-      price,
-      duration,
-      maxUsers,
-      maxProducts,
-      features,
-      status
-    });
-
+    const plan = await Plan.create({ name, price, duration, maxUsers, maxProducts, features, status });
     ApiResponse.created(res, plan, 'Plan created successfully');
   } catch (error) {
     next(error);
@@ -326,13 +272,11 @@ const createPlan = async (req, res, next) => {
 
 const updatePlan = async (req, res, next) => {
   try {
+    const { Plan } = getMasterModels();
     const plan = await Plan.findByPk(req.params.id);
-    if (!plan) {
-      return ApiResponse.error(res, 'Plan not found', 404);
-    }
+    if (!plan) return ApiResponse.error(res, 'Plan not found', 404);
 
     const { name, price, duration, maxUsers, maxProducts, features, status } = req.body;
-
     const updateData = {};
     if (name) updateData.name = name;
     if (price !== undefined) updateData.price = price;
@@ -351,10 +295,9 @@ const updatePlan = async (req, res, next) => {
 
 const deletePlan = async (req, res, next) => {
   try {
+    const { Plan } = getMasterModels();
     const plan = await Plan.findByPk(req.params.id);
-    if (!plan) {
-      return ApiResponse.error(res, 'Plan not found', 404);
-    }
+    if (!plan) return ApiResponse.error(res, 'Plan not found', 404);
 
     await plan.destroy();
     ApiResponse.success(res, null, 'Plan deleted successfully');
@@ -365,18 +308,14 @@ const deletePlan = async (req, res, next) => {
 
 const getSubscriptions = async (req, res, next) => {
   try {
+    const { Subscription, Client, Plan } = getMasterModels();
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
 
     const { count, rows } = await Subscription.findAndCountAll({
-      include: [
-        { model: Client, as: 'client' },
-        { model: Plan, as: 'plan' }
-      ],
-      limit,
-      offset,
-      order: [['createdAt', 'DESC']]
+      include: [{ model: Client }, { model: Plan }],
+      limit, offset, order: [['createdAt', 'DESC']]
     });
 
     ApiResponse.paginated(res, rows, count, page, limit);
@@ -387,16 +326,12 @@ const getSubscriptions = async (req, res, next) => {
 
 const getActivityLogs = async (req, res, next) => {
   try {
+    const { ActivityLog } = getMasterModels();
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
     const offset = (page - 1) * limit;
 
-    const { count, rows } = await ActivityLog.findAndCountAll({
-      limit,
-      offset,
-      order: [['createdAt', 'DESC']]
-    });
-
+    const { count, rows } = await ActivityLog.findAndCountAll({ limit, offset, order: [['createdAt', 'DESC']] });
     ApiResponse.paginated(res, rows, count, page, limit);
   } catch (error) {
     next(error);
@@ -404,20 +339,7 @@ const getActivityLogs = async (req, res, next) => {
 };
 
 module.exports = {
-  superAdminLogin,
-  refreshToken,
-  getDashboard,
-  getClients,
-  getClient,
-  createClient,
-  updateClient,
-  deleteClient,
-  suspendClient,
-  activateClient,
-  getPlans,
-  createPlan,
-  updatePlan,
-  deletePlan,
-  getSubscriptions,
-  getActivityLogs
+  superAdminLogin, refreshToken, getDashboard, getClients, getClient,
+  createClient, updateClient, deleteClient, suspendClient, activateClient,
+  getPlans, createPlan, updatePlan, deletePlan, getSubscriptions, getActivityLogs
 };

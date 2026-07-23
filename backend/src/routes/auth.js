@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 
 const {
-  superAdminLogin,
   clientLogin,
   refreshToken,
   getProfile,
@@ -13,7 +12,6 @@ const { authenticate, authorizeClient } = require('../middleware/auth');
 const tenantContext = require('../middleware/tenantContext');
 const upload = require('../middleware/upload');
 
-router.post('/super-admin/login', superAdminLogin);
 router.post('/client/login', clientLogin);
 router.post('/refresh-token', refreshToken);
 
