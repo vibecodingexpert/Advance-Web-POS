@@ -25,8 +25,21 @@ import Reports from './pages/client/Reports';
 import Settings from './pages/client/Settings';
 import Users from './pages/client/Users';
 
-function App() {
+function ProtectedRoute({ children, allowedRole }) {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
+
+  if (!isAuthenticated) {
+    return <Navigate to="/portal/login" replace />;
+  }
+
+  if (allowedRole && user?.role !== allowedRole) {
+    return <Navigate to={user?.role === 'super_admin' ? '/admin' : '/dashboard'} replace />;
+  }
+
+  return children;
+}
+
+function App() {
   const { darkMode } = useSelector((state) => state.ui);
 
   useEffect(() => {
@@ -39,38 +52,36 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/portal/login" />} />
+      <Route path="/" element={<Navigate to="/portal/login" replace />} />
       <Route path="/portal/login" element={<ClientLogin />} />
       <Route path="/secure/login" element={<SuperAdminLogin />} />
 
-      {user?.role === 'super_admin' ? (
-        <Route path="/admin" element={<SuperAdminLayout />}>
-          <Route index element={<SuperAdminDashboard />} />
-          <Route path="clients" element={<ClientManagement />} />
-          <Route path="plans" element={<PlanManagement />} />
-        </Route>
-      ) : isAuthenticated ? (
-        <Route path="/dashboard" element={<ClientLayout />}>
-          <Route index element={<ClientDashboard />} />
-          <Route path="pos" element={<POS />} />
-          <Route path="products" element={<Products />} />
-          <Route path="categories" element={<Categories />} />
-          <Route path="brands" element={<Brands />} />
-          <Route path="units" element={<Units />} />
-          <Route path="customers" element={<Customers />} />
-          <Route path="vendors" element={<Vendors />} />
-          <Route path="sales" element={<Sales />} />
-          <Route path="purchases" element={<Purchases />} />
-          <Route path="expenses" element={<Expenses />} />
-          <Route path="assets" element={<Assets />} />
-          <Route path="inventory" element={<Inventory />} />
-          <Route path="reports" element={<Reports />} />
-          <Route path="settings" element={<Settings />} />
-          <Route path="users" element={<Users />} />
-        </Route>
-      ) : (
-        <Route path="*" element={<Navigate to="/portal/login" />} />
-      )}
+      <Route path="/admin" element={<ProtectedRoute allowedRole="super_admin"><SuperAdminLayout /></ProtectedRoute>}>
+        <Route index element={<SuperAdminDashboard />} />
+        <Route path="clients" element={<ClientManagement />} />
+        <Route path="plans" element={<PlanManagement />} />
+      </Route>
+
+      <Route path="/dashboard" element={<ProtectedRoute><ClientLayout /></ProtectedRoute>}>
+        <Route index element={<ClientDashboard />} />
+        <Route path="pos" element={<POS />} />
+        <Route path="products" element={<Products />} />
+        <Route path="categories" element={<Categories />} />
+        <Route path="brands" element={<Brands />} />
+        <Route path="units" element={<Units />} />
+        <Route path="customers" element={<Customers />} />
+        <Route path="vendors" element={<Vendors />} />
+        <Route path="sales" element={<Sales />} />
+        <Route path="purchases" element={<Purchases />} />
+        <Route path="expenses" element={<Expenses />} />
+        <Route path="assets" element={<Assets />} />
+        <Route path="inventory" element={<Inventory />} />
+        <Route path="reports" element={<Reports />} />
+        <Route path="settings" element={<Settings />} />
+        <Route path="users" element={<Users />} />
+      </Route>
+
+      <Route path="*" element={<Navigate to="/portal/login" replace />} />
     </Routes>
   );
 }

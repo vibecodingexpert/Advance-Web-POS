@@ -1,6 +1,8 @@
 const { masterDb } = require('../../config/database');
 const { DataTypes } = require('sequelize');
 
+let cachedModels = null;
+
 const initMasterModels = async () => {
   const SuperAdmin = require('./SuperAdmin')(masterDb, DataTypes);
   const Client = require('./Client')(masterDb, DataTypes);
@@ -26,7 +28,15 @@ const initMasterModels = async () => {
 
   await masterDb.sync({ alter: true });
 
+  cachedModels = models;
   return models;
 };
 
-module.exports = { initMasterModels };
+const getMasterModels = () => {
+  if (!cachedModels) {
+    throw new Error('Master models not initialized. Call initMasterModels first.');
+  }
+  return cachedModels;
+};
+
+module.exports = { initMasterModels, getMasterModels };

@@ -1,11 +1,11 @@
 const bcrypt = require('bcryptjs');
 const { masterDb, getClientDb } = require('../config/database');
-const { initMasterModels } = require('../models/master');
+const { getMasterModels } = require('../models/master');
 const { initClientModels } = require('../models/client');
 const { ROLES, ROLE_PERMISSIONS, PERMISSIONS } = require('../utils/constants');
 
 const createDefaultSuperAdmin = async () => {
-  const { SuperAdmin } = require('../models/master').masterModels;
+  const { SuperAdmin } = getMasterModels();
 
   const email = process.env.SUPER_ADMIN_EMAIL || 'admin@pos.com';
   const password = process.env.SUPER_ADMIN_PASSWORD || 'Admin@12345';
@@ -34,9 +34,7 @@ const createDefaultRoles = async (sequelize) => {
     module: key.split('_')[0].charAt(0).toUpperCase() + key.split('_')[0].slice(1)
   }));
 
-  const createdPermissions = await Permission.bulkCreate(permissions, {
-    ignoreDuplicates: true
-  });
+  await Permission.bulkCreate(permissions, { ignoreDuplicates: true });
 
   const allPermissions = await Permission.findAll();
   const permissionMap = {};
