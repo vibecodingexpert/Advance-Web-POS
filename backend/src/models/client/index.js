@@ -71,6 +71,8 @@ const initClientModels = (sequelize) => {
   DayBook.belongsTo(User, { foreignKey: 'userId' });
   CashBook.belongsTo(User, { foreignKey: 'userId' });
 
+  HeldInvoice.belongsTo(User, { as: 'user', foreignKey: 'userId' });
+
   return {
     User, Role, Permission, Product, Category, Brand, Unit,
     Customer, Vendor, Sale, SaleItem, Purchase, PurchaseItem,
