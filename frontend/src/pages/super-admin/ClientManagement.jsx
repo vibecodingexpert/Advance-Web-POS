@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
 import { toast } from 'react-toastify';
-import { FiEdit2, FiTrash2, FiToggleLeft, FiToggleRight, FiPlus, FiSearch, FiX } from 'react-icons/fi';
+import { FiEdit2, FiTrash2, FiToggleLeft, FiToggleRight, FiPlus, FiSearch, FiX, FiCopy } from 'react-icons/fi';
 
 const defaultForm = { businessName: '', ownerName: '', email: '', phone: '', address: '', city: '', country: '', password: '' };
 
@@ -155,7 +155,15 @@ const ClientManagement = () => {
                   <td className="table-cell text-gray-500">{client.email}</td>
                   <td className="table-cell text-gray-500">{client.phone || '-'}</td>
                   <td className="table-cell">{statusBadge(client.status)}</td>
-                  <td className="table-cell text-xs text-gray-400 font-mono">{client.databaseName}</td>
+                  <td className="table-cell">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs text-gray-400 font-mono">{client.databaseName}</span>
+                      <button onClick={() => { navigator.clipboard.writeText(client.databaseName); toast.success('Copied!'); }}
+                        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" title="Copy business code">
+                        <FiCopy size={12} />
+                      </button>
+                    </div>
+                  </td>
                   <td className="table-cell">
                     <div className="flex items-center gap-1">
                       <button onClick={() => openEditModal(client)} className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg" title="Edit"><FiEdit2 size={15} /></button>
@@ -212,10 +220,15 @@ const ClientManagement = () => {
                 <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Country</label>
                   <input name="country" value={formData.country} onChange={handleChange} className="input-field" /></div>
               </div>
-              {!editing && (
-                <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
-                  <input name="password" type="password" value={formData.password} onChange={handleChange} className="input-field" placeholder="Default: password123" /></div>
+              {editing && (
+                <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Database</label>
+                  <input value={editing.databaseName} className="input-field bg-gray-50 dark:bg-gray-700 text-gray-500" disabled /></div>
               )}
+              <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                {editing ? 'New Password (leave empty to keep current)' : 'Password'}</label>
+                <input name="password" type="password" value={formData.password} onChange={handleChange}
+                  className="input-field" placeholder={editing ? 'Enter new password' : 'Default: password123'}
+                  required={!editing} /></div>
               <div className="flex justify-end gap-3 pt-2">
                 <button type="button" onClick={() => setModalOpen(false)} className="btn-secondary">Cancel</button>
                 <button type="submit" disabled={saving} className="btn-primary">{saving ? 'Saving...' : editing ? 'Update' : 'Create'}</button>

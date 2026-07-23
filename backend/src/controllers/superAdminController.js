@@ -197,7 +197,7 @@ const updateClient = async (req, res, next) => {
     const client = await Client.findByPk(req.params.id);
     if (!client) return ApiResponse.error(res, 'Client not found', 404);
 
-    const { businessName, ownerName, email, phone, address, city, country } = req.body;
+    const { businessName, ownerName, email, phone, address, city, country, password } = req.body;
     const logo = req.file ? req.file.path : undefined;
 
     const updateData = {};
@@ -211,6 +211,18 @@ const updateClient = async (req, res, next) => {
     if (logo) updateData.logo = logo;
 
     await client.update(updateData);
+
+    if (password && client.databaseName) {
+      try {
+        const sequelize = getClientDb(client.databaseName);
+        const models = initClientModels(sequelize);
+        const hashedPassword = await bcrypt.hash(password, 12);
+        await models.User.update({ password: hashedPassword }, { where: { email: client.email } });
+      } catch (err) {
+        console.error('Failed to update client user password:', err);
+      }
+    }
+
     ApiResponse.success(res, client, 'Client updated successfully');
   } catch (error) {
     next(error);

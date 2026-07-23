@@ -61,6 +61,7 @@ const ClientLogin = () => {
                 placeholder="Enter your business code"
                 required
               />
+              <p className="text-xs text-gray-400 mt-1.5">Ask your admin for your business code (e.g., client_your_store_abc123)</p>
             </div>
 
             <div>
