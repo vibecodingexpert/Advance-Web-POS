@@ -28,7 +28,7 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6c5ce7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="3" width="18" height="18" rx="2" /><path d="M9 12h6" /><path d="M12 9v6" />
             </svg>
-            PMS
+            POS
           </div>
         </div>
         <nav className="flex-1 p-3 space-y-1">
@@ -60,7 +60,7 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
           <button onClick={() => setSidebarOpen(!sidebarOpen)} className="lg:hidden p-2 hover:bg-zinc-100 rounded-lg">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12h18" /><path d="M3 6h18" /><path d="M3 18h18" /></svg>
           </button>
-          <div className="text-sm text-muted-foreground hidden sm:block">Project Management System</div>
+          <div className="text-sm text-muted-foreground hidden sm:block">Point of Sale System</div>
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-[#6c5ce7] rounded-full flex items-center justify-center text-white text-xs font-bold">A</div>
           </div>

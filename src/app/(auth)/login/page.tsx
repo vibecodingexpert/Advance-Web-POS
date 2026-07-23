@@ -38,7 +38,7 @@ export default function LoginPage() {
             <rect x="3" y="3" width="18" height="18" rx="2" />
             <path d="M9 12h6" /><path d="M12 9v6" />
           </svg>
-          PMS
+          POS
         </a>
         <div className="flex flex-col gap-6">
           <div className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm">

@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "PMS - Project Management System",
-  description: "Manage projects, tasks, and team attendance",
+  title: "POS - Advanced Web POS",
+  description: "Point of Sale system for managing sales, inventory, and team",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
