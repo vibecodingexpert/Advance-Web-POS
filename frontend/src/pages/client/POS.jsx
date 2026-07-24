@@ -818,7 +818,7 @@ const SaleInvoice = () => {
               <input ref={productSearchRef} type="text" value={productSearch} onChange={e => setProductSearch(e.target.value)}
                 placeholder="Search product by name or barcode..."
                 className="pos-input !border-0 !shadow-none !p-0 !h-7 text-sm"
-                onKeyDown={e => { if (e.key === 'Escape') setShowProductSearch(false); }}} />
+                 onKeyDown={e => { if (e.key === 'Escape') setShowProductSearch(false); }} />
             </div>
             <div className="flex-1 overflow-auto">
               {productSearchResults.map(p => (
